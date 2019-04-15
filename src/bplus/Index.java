@@ -1,9 +1,14 @@
+/* Index Node class for creating index nodes*/
 package bplus;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
+/**
+ *
+ * @author harsh
+ */
 public class Index extends Node {
 
 	// m nodes

@@ -1,3 +1,6 @@
+/*
+Tree class for executing B+Tree operations
+*/
 package bplus;
 
 import java.util.AbstractMap;
@@ -20,6 +23,9 @@ public class Tree {
     //Delete a pair with specefic key in B+Tree
     
     public void delete(int key) {
+        if(rootNode==null){
+            return;
+        }
         int index = helper.deleteHandler(null, rootNode, key);
         if (index != -1) {
             rootNode.keys.remove(index);
@@ -37,7 +43,11 @@ public class Tree {
     
     public Double search(int key) {
         Leaf leaf = helper.searchHandler(rootNode, key);
+        if(leaf!=null){
         return (leaf.getValue(key));
+        }else{
+            return null;
+        }
 
     }
     

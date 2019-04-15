@@ -1,7 +1,5 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+Processing input command one by One
  */
 package bplus;
 
@@ -53,6 +51,7 @@ public class ProcessInputFile {
                     //handling both simple search and range of search   
                     case "Delete":
                         int key = Integer.parseInt(commands.substring(commands.indexOf("(") + 1, commands.indexOf(")")));
+                        System.out.print("\n"+key);
                         tree.delete(key);
                         break;
                     case "Search":
@@ -89,7 +88,7 @@ public class ProcessInputFile {
         } catch (IOException exc) {
             System.out.println("IOException while reading the file or trying to close the file ");
         } finally {
-            writer.close();
+        writer.close();
         }
 
     }

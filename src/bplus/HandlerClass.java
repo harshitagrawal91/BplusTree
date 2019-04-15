@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+/* Handling splitting,recursive insert and recursive delete in this handler class*/
 package bplus;
 
 import static bplus.Tree.DEGREE;
@@ -146,6 +142,7 @@ public class HandlerClass {
         return splitted;
     }
 // Recursively find the leaf node to delete a given key
+ 
     public int deleteHandler(Index parent, Node node, int key) {
         int indexToDelete = -1;
         int indexInParent = -1;
@@ -168,114 +165,105 @@ public class HandlerClass {
                 }
             }
 
-            // check for underflow
+            // if node underflows and handle underflow condition by checking left node
             if (leafNode.isUnderflowed() && leafNode != Tree.rootNode) {
-                // find index leafnode resides in parent
-                if (indexInParent - 1 >= 0) {
-                    // node has left child
+                if ((indexInParent-1) >= 0) {
                     Leaf left = (Leaf) parent.children.get(indexInParent - 1);
                     return leafUnderflowHandler(left, leafNode, parent);
                 } else {
-                    // node does not have left child
-                    Leaf right = (Leaf) parent.children.get(indexInParent + 1);
+                    Leaf right;
+                    right = (Leaf) parent.children.get(indexInParent-1);
                     return leafUnderflowHandler(leafNode, right, parent);
+                  
                 }
             } else {
-                // may need to update parents / ancestors if deleted splitting key
+                // updating parents
                 if (leafNode.keys.size() > 0) {
                     updateIndexNodeKey(Tree.rootNode, key, leafNode.keys.get(0));
                 }
-                return -1; // delete did not cause underflow
+                return -1;
+                //no underflow so returning -1
             }
 
         } else {
-            // Node is an IndexNode 
             Index idxNode = (Index) node;
+            //handling conditin if node is an index node
             if (key < idxNode.keys.get(0)) {
-                // go down first child
+                // first child node check
+                if(!idxNode.children.isEmpty())
                 indexToDelete = deleteHandler(idxNode, idxNode.children.get(0), key);
             } else if (key >= idxNode.keys.get(idxNode.keys.size() - 1)) {
-                // go down last child
+                if(!idxNode.children.isEmpty())
                 indexToDelete = deleteHandler(idxNode, idxNode.children.get(idxNode.children.size() - 1), key);
             } else {
-                // go down the middle children
                 for (int i = 0; i < idxNode.keys.size(); i++) {
+                     // if not first and last then handling for middle childeren
                     if (idxNode.keys.get(i) > key) {
                         indexToDelete = deleteHandler(idxNode, idxNode.children.get(i), key);
                     }
                 }
             }
         }
-
-        // see if there is an index to delete remaining
         if (indexToDelete != -1) {
             if (node == Tree.rootNode) {
                 return indexToDelete;
             }
             node.keys.remove(indexToDelete);
-
-            // if removal caused underflow 
             if (node.isUnderflowed()) {
-                // determine if node has left sibling
+                // handling underflow conditiom
                 Index left = (Index) node;
                 Index right = (Index) node;
-
-                // check to see if indexNode has sibling
                 if (indexInParent - 1 >= 0) {
+                    //handling left sibling if exist
                     left = (Index) parent.children.get(indexInParent - 1);
                 } else {
+                    //handling right sibling if exist
+                    try{
                     right = (Index) parent.children.get(indexInParent + 1);
+                    }catch(IndexOutOfBoundsException e){
+                        System.out.print("");
+                    }
                 }
                 return indexUnderflowHandler(left, right, parent);
             }
         }
-
         return -1;
     }
 
-   
-     // Handle underflow condition in leaf node
+    // Handle underflow condition in leaf node
     public int leafUnderflowHandler(Leaf left, Leaf right,
             Index parent) {
 
-        // merge
-        if (left.keys.size() + right.keys.size() < DEGREE) {
+        if (left.keys.size() + right.keys.size() <= DEGREE-1) {
+            //merging nodes & deleting nodes
             left.keys.addAll(right.keys);
             left.values.addAll(right.values);
             left.nextNode = right.nextNode;
-
-            // delete the other node
             int indexInParent = parent.children.indexOf(right);
             parent.children.remove(indexInParent);
             return indexInParent - 1;
         }
-
-        // re-distribute
         int childsIndexInParent;
         if (left.isUnderflowed()) {
             childsIndexInParent = parent.children.indexOf(right);
-            // get the minimum key value of right
+            // geting min value
             left.insertInSortedOrder(right.keys.remove(0), right.values.remove(0));
         } else {
+             // geting max value
             childsIndexInParent = parent.children.indexOf(right);
-            // get maximum key value of left
             right.insertInSortedOrder(left.keys.remove(left.keys.size() - 1), left.values.remove(left.values.size() - 1));
             parent.keys.set(childsIndexInParent - 1, parent.children.get(childsIndexInParent).keys.get(0));
         }
         parent.keys.set(childsIndexInParent - 1, parent.children.get(childsIndexInParent).keys.get(0));
-
-        // update the parent's index key
         return -1;
 
     }
 
-    
-     //Handle underflow condition in index node
-
+    //Handle underflow condition in index node
     public int indexUnderflowHandler(Index leftIndex,
             Index rightIndex, Index parent) {
         int separatingKey;
-        int index;  
+        int index;
         for (index = 0; index < parent.keys.size(); index++) {
             if (parent.children.get(index) == leftIndex && parent.children.get(index + 1) == rightIndex) {
                 break;
@@ -284,41 +272,31 @@ public class HandlerClass {
 
         separatingKey = parent.keys.get(index);
 
-        // Action : merge
-        if (leftIndex.keys.size() + rightIndex.keys.size() < DEGREE) {
-            // move separating key down 
+        if (leftIndex.keys.size() + rightIndex.keys.size() <= DEGREE-1) { 
             leftIndex.keys.add(separatingKey);
             leftIndex.keys.addAll(rightIndex.keys);
-
             leftIndex.children.addAll(rightIndex.children);
-
-            // delete the right side
+            // deleting right side
             parent.children.remove(parent.children.indexOf(rightIndex));
             return index;
-
         }
-
-        // Action: Distribute
+        // Distributing
         if (leftIndex.isUnderflowed()) {
-            // move separating key down to leftIndex
+            // moveing separating key down to left
             leftIndex.keys.add(separatingKey);
-            // move leftmost key from right up 
+            // moving leftmost key up 
             parent.keys.set(index, rightIndex.keys.remove(0));
-            // leftmost child of right is now left's
             leftIndex.children.add(rightIndex.children.remove(0));
         } else if (rightIndex.isUnderflowed()) {
-            // move separating key down to rightIndex
+            // moving seperating key down
             rightIndex.keys.add(0, separatingKey);
-            // the last child of left index sibling is now right index's
             Node lastChild = leftIndex.children.remove(leftIndex.children.size() - 1);
             rightIndex.children.add(0, lastChild);
-            // move rightmost key from leftIndex up
             parent.keys.set(parent.keys.size() - 1, leftIndex.keys.remove(leftIndex.keys.size() - 1));
         }
-
         return -1;
     }
-
+    //updating index key node after splitting
     private void updateIndexNodeKey(Node theNode, int searchKey, int newKey) {
         if (theNode == null) {
             return;
@@ -330,8 +308,6 @@ public class HandlerClass {
 
         Index idxNode = (Index) theNode;
         for (int i = 0; i < theNode.keys.size(); i++) {
-            // not here, don't need to keep going
-
             if (idxNode.keys.get(i) > searchKey) {
                 break;
             }
@@ -341,8 +317,6 @@ public class HandlerClass {
                 return;
             }
         }
-
-        // not found, perhaps in another child
         if (searchKey < idxNode.keys.get(0)) {
             updateIndexNodeKey(idxNode.children.get(0), searchKey, newKey);
         } else if (searchKey > idxNode.keys.get(idxNode.keys.size() - 1)) {

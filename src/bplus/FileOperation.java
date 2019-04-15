@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+/*Handling file operation i.e. reading input file and writing output file*/
 package bplus;
 
 import java.io.BufferedReader;
