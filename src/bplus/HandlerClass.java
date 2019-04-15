@@ -167,14 +167,12 @@ public class HandlerClass {
 
             // if node underflows and handle underflow condition by checking left node
             if (leafNode.isUnderflowed() && leafNode != Tree.rootNode) {
-                if ((indexInParent-1) >= 0) {
+                if (indexInParent - 1 >= 0) {
                     Leaf left = (Leaf) parent.children.get(indexInParent - 1);
                     return leafUnderflowHandler(left, leafNode, parent);
                 } else {
-                    Leaf right;
-                    right = (Leaf) parent.children.get(indexInParent + 1);
+                    Leaf right = (Leaf) parent.children.get(indexInParent + 1);
                     return leafUnderflowHandler(leafNode, right, parent);
-                  
                 }
             } else {
                 // updating parents
@@ -190,10 +188,8 @@ public class HandlerClass {
             //handling conditin if node is an index node
             if (key < idxNode.keys.get(0)) {
                 // first child node check
-                if(!idxNode.children.isEmpty())
                 indexToDelete = deleteHandler(idxNode, idxNode.children.get(0), key);
             } else if (key >= idxNode.keys.get(idxNode.keys.size() - 1)) {
-                if(!idxNode.children.isEmpty())
                 indexToDelete = deleteHandler(idxNode, idxNode.children.get(idxNode.children.size() - 1), key);
             } else {
                 for (int i = 0; i < idxNode.keys.size(); i++) {
@@ -259,6 +255,7 @@ public class HandlerClass {
 
     }
 
+    
     //Handle underflow condition in index node
     public int indexUnderflowHandler(Index leftIndex,
             Index rightIndex, Index parent) {
