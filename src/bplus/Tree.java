@@ -90,7 +90,6 @@ public class Tree {
     // function to Insert a given pair in a B+ tree
     
     public void insert(int key, Double value) {
-        System.out.print("pp");
         if (rootNode == null) {
             rootNode = new Leaf(key, value);
         }

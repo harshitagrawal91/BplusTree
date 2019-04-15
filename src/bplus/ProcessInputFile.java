@@ -51,7 +51,6 @@ public class ProcessInputFile {
                     //handling both simple search and range of search   
                     case "Delete":
                         int key = Integer.parseInt(commands.substring(commands.indexOf("(") + 1, commands.indexOf(")")));
-                        System.out.print("\n"+key);
                         tree.delete(key);
                         break;
                     case "Search":
