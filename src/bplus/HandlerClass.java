@@ -172,7 +172,7 @@ public class HandlerClass {
                     return leafUnderflowHandler(left, leafNode, parent);
                 } else {
                     Leaf right;
-                    right = (Leaf) parent.children.get(indexInParent-1);
+                    right = (Leaf) parent.children.get(indexInParent + 1);
                     return leafUnderflowHandler(leafNode, right, parent);
                   
                 }
